@@ -1,0 +1,36 @@
+# /etc/olcrtc/server.yaml
+#
+# This server profile matches the Android client defaults in this repository.
+# Replace the room and key, then use the same values in the app .env file.
+mode: srv
+
+auth:
+  provider: jitsi
+
+room:
+  # Full Jitsi room URL. Must match JITSI_ROOM_ID in .env exactly.
+  id: "https://meet.handyweb.org/REPLACE_WITH_ROOM_ID"
+
+crypto:
+  # Generate with: openssl rand -hex 32
+  # Must match OLCRTC_KEY in .env exactly.
+  key: "REPLACE_ME_WITH_64_HEX_CHARS"
+
+net:
+  transport: datachannel
+  dns: "8.8.8.8:53"
+
+# Optional upstream SOCKS5 proxy on the server, for example Xray.
+# Remove this block if olcrtc should dial the internet directly.
+socks:
+  proxy_addr: "127.0.0.1"
+  proxy_port: 10808
+
+# Current olcRTC uses "interval", not "ping_interval".
+liveness:
+  interval: 30s
+  timeout: 90s
+  failures: 3
+
+data: /opt/olcrtc/data
+debug: false
