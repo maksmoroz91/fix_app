@@ -32,6 +32,27 @@ class OlcrtcRecoveryPolicyTest {
     }
 
     @Test
+    fun restartReasonUsesNativeRestartDecisionAsGate() {
+        val restartLine =
+            "22:15:50 logger.go:110: client reconnect: exhausted 5 handshake attempts " +
+                "(reason=carrier) - keeping listener up"
+        val corruptionLine =
+            "22:14:05 logger.go:110: handshake on reconnect failed (attempt 1): " +
+                "handshake client: read welcome: handshake: frame too large: 2065856101 > 65536"
+
+        assertTrue(OlcrtcRecoveryPolicy.shouldRestartNative(restartLine))
+        assertEquals(
+            OlcrtcRecoveryPolicy.shouldRestartNative(restartLine),
+            OlcrtcRecoveryPolicy.restartReason(restartLine) != null
+        )
+        assertFalse(OlcrtcRecoveryPolicy.shouldRestartNative(corruptionLine))
+        assertEquals(
+            OlcrtcRecoveryPolicy.shouldRestartNative(corruptionLine),
+            OlcrtcRecoveryPolicy.restartReason(corruptionLine) != null
+        )
+    }
+
+    @Test
     fun commonReconnectNoiseDoesNotTriggerNativeRestart() {
         assertFalse(
             OlcrtcRecoveryPolicy.shouldRestartNative(

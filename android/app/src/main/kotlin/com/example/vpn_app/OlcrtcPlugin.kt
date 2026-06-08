@@ -221,6 +221,8 @@ class OlcrtcPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     }
 
     private fun handleNativeLogLine(line: String) {
+        if (!OlcrtcRecoveryPolicy.shouldRestartNative(line)) return
+
         val reason = OlcrtcRecoveryPolicy.restartReason(line) ?: return
         val config = currentStartConfig ?: run {
             Log.w(TAG, "Ignoring olcrtc recovery signal without start config: $reason")

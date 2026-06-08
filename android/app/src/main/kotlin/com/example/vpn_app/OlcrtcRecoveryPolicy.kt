@@ -6,6 +6,8 @@ object OlcrtcRecoveryPolicy {
     private const val RECONNECT_EXHAUSTED = "client reconnect: exhausted"
     private const val HANDSHAKE_ATTEMPTS = "handshake attempts"
     private const val KEEPING_LISTENER_UP = "keeping listener up"
+    private const val RECONNECT_HANDSHAKE_ATTEMPTS_EXHAUSTED =
+        "reconnect handshake attempts exhausted"
 
     fun isReconnectHandshakeCorruption(logLine: String): Boolean {
         val line = logLine.lowercase()
@@ -13,19 +15,24 @@ object OlcrtcRecoveryPolicy {
     }
 
     fun restartReason(logLine: String): String? {
+        if (!shouldRestartNative(logLine)) {
+            return null
+        }
+
+        return RECONNECT_HANDSHAKE_ATTEMPTS_EXHAUSTED
+    }
+
+    fun shouldRestartNative(logLine: String): Boolean {
+        if (isReconnectHandshakeCorruption(logLine)) {
+            return false
+        }
+
         val line = logLine.lowercase()
 
-        if (
+        return (
             line.contains(RECONNECT_EXHAUSTED) &&
             line.contains(HANDSHAKE_ATTEMPTS) &&
             line.contains(KEEPING_LISTENER_UP)
-        ) {
-            return "reconnect handshake attempts exhausted"
-        }
-
-        return null
+        )
     }
-
-    fun shouldRestartNative(logLine: String): Boolean =
-        restartReason(logLine) != null
 }
